@@ -1,5 +1,6 @@
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,6 +18,8 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     private static final String rmiServer = ":" + port + "/JogoServer";
 
     private static volatile int idGenerator = 0;
+
+    private static String remoteHostName;
 
     private static Map<Integer, Integer> playerScores;
 
@@ -45,6 +48,8 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
         while (true) {
 
+            //verificar se ta ativo
+
             Thread.sleep(1000);
         }
 
@@ -52,16 +57,20 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
     @Override
     public int registra() throws RemoteException {
-        playerScores.put(idGenerator, 0);
+        try {
+            remoteHostName = getClientHost();
+        } catch (ServerNotActiveException ex) {
+            ex.printStackTrace();
+        }
         
+        playerScores.put(idGenerator, 0);
+
         return idGenerator++;
     }
 
     @Override
     public int joga(int id) throws RemoteException {
         System.out.println(String.format("Jogador ID %d vai jogar....", id));
-
-        
 
         playerScores.put(id, playerScores.get(id) + 5);
 
@@ -71,23 +80,37 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
         try {
             Thread.sleep(playTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
         }
 
-        return 0;
+        return playerScores.get(id);
     }
 
     @Override
     public int desiste(int id) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
+        System.out.println(String.format("Jogador ID %s desistiu do jogo, retornando sua pontuação final", id));
+
+        int finalScore = playerScores.get(id);
+
+        playerScores.remove(id);
+
+        System.out.println("Desconectando cliente...");
+
+        return finalScore;
     }
 
     @Override
     public int finaliza(int id) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
+        System.out.println(String.format("Jogador ID %s finalizou o jogo, retornando sua pontuação final", id));
+
+        int finalScore = playerScores.get(id);
+
+        playerScores.remove(id);
+
+        System.out.println("Desconectando cliente...");
+
+        return finalScore;
     }
 
 }
