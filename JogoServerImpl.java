@@ -10,8 +10,11 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     }
 
     private static final long serialVersionUID = 1L;
+    
+    private static final int port = 52369;
+    private static final String rmiServer = ":" + port + "/JogoServer";
 
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, InterruptedException {
 		if (args.length != 2) {
             //ADICIONAR PARAMETRO PALYERS
 			System.out.println("Usage: java AdditionServer <server ip> <players>");
@@ -20,19 +23,26 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
 		try {
 			System.setProperty("java.rmi.server.hostname", args[0]);
-			LocateRegistry.createRegistry(52369);
+			LocateRegistry.createRegistry(port);
 			System.out.println("java RMI registry created.");
 		} catch (RemoteException e) {
 			System.out.println("java RMI registry already exists.");
 		}
 
 		try {
-			String server = "rmi://" + args[0] + ":52369/Hello";
+			String server = "rmi://" + args[0] + rmiServer;
 			Naming.rebind(server, new JogoServerImpl());
 			System.out.println("JogoServer is ready.");
 		} catch (Exception e) {
 			System.out.println("JogoServer failed: " + e);
 		}
+
+        while(true){
+
+        
+            Thread.sleep(1000);
+        }
+
     }
 
     @Override
