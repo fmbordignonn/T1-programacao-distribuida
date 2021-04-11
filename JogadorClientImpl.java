@@ -2,8 +2,14 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Scanner;
+import java.util.Timer;
+
+import javax.swing.text.StyledEditorKit.BoldAction;
 
 public class JogadorClientImpl extends UnicastRemoteObject implements JogadorClient {
+
+	private static volatile int i;
 
     protected JogadorClientImpl() throws RemoteException {
         super();
@@ -15,7 +21,9 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
     private static final String rmiServer = ":" + port + "/JogoServer";
     private static final String rmiClient = ":" + port + "/JogadorClient";
 
-    public static void main(String[] args) {
+		private static boolean gameStarted = false;
+
+    public static void main(String[] args) throws InterruptedException, RemoteException {
 
         //ADICIONAR NUMBER OF PLAYS
 		if (args.length != 3) {
@@ -31,8 +39,10 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 			System.out.println("java RMI registry already exists.");
 		}
 
+		i = 0;
+
 		try {
-			String client = "rmi://" + args[1] + rmiClient;
+			String client = "rmi://" + args[1] + rmiClient + i++;
 			Naming.rebind(client, new JogadorClientImpl());
 			System.out.println("JogadorClient is ready.");
 		} catch (Exception e) {
@@ -52,36 +62,56 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 			e.printStackTrace();
 		}
 
-		while (true) {
-			try {
-				jogoServer.registra();
-				System.out.println("Calling server to register" );
-			} catch (RemoteException e) {
+		try {
+			jogoServer.registra();
+			System.out.println("Calling server to register player" + i);
+		} catch (RemoteException e) {
 				e.printStackTrace();
 			}
-			try {
+
+			while(!gameStarted) {
 				Thread.sleep(1000);
-			} catch (InterruptedException ex) {}
+			}
+
+			Scanner sc = new Scanner(System.in);
+			Timer timer = new Timer();
+
+			for (int i = 0; i < Integer.parseInt(args[2]); i++) {
+
+				jogoServer.joga(0); //verificar parâmetro
+
+				String desiste = sc.nextLine();
+
+				if (desiste.equals("ff")) {
+
+					jogoServer.desiste(0); //verificar parâmetro
+					System.exit(1);
+
+				}
+
+				jogoServer.finaliza(0); //verificar parâmetro
+				System.exit(1);
+			}
 		}
-	}
-    
 
     @Override
     public void inicia() throws RemoteException {
-        // TODO Auto-generated method stub
-        
+			System.out.println("Called back.");
+			System.out.println("The game has started!");
+
+			gameStarted = true;
     }
 
     @Override
     public void bonifica() throws RemoteException {
-        // TODO Auto-generated method stub
-        
+			System.out.println("Called back.");
+			System.out.println("You got a bonus!");
+
     }
 
     @Override
     public void verifica() throws RemoteException {
-        // TODO Auto-generated method stub
-        
+			System.out.println("Called back.");
+			System.out.println("Server ping test to verify player!");
     }
-
 }
