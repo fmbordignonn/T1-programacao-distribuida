@@ -16,12 +16,15 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
     private static final int port = 52369;
     private static final String rmiServer = ":" + port + "/JogoServer";
+    private static final String rmiClient = ":" + port + "/JogadorClient";
 
     private static volatile int idGenerator = 0;
 
     private static String remoteHostName;
 
     private static Map<Integer, Integer> playerScores;
+
+    private static Map<Integer, String> clientIPs;
 
     public static void main(String[] args) throws RemoteException, InterruptedException {
         if (args.length != 2) {
@@ -47,10 +50,31 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
         }
 
         while (true) {
+            // verificar size
+            for (int i = 0; i < clientIPs.size(); i++) {
+                // monta a string pra buscar o client na sua interface VALIDAR
+                String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
 
-            //verificar se ta ativo
+                JogadorClient jogadorClient = null;
 
-            Thread.sleep(1000);
+                try {
+                    System.out.println("Connecting to client at " + connectLocation);
+                    jogadorClient = (JogadorClient) Naming.lookup(connectLocation);
+
+                } catch (Exception ex) {
+                    System.err.println("Failed to callback");
+                    ex.printStackTrace();
+                }
+
+                try {
+                    jogadorClient.verifica();
+                } catch (RemoteException ex) {
+                    System.err.println("An error has occurred while calling verifica() method");
+                    ex.printStackTrace();
+                }
+            }
+
+            Thread.sleep(5000);
         }
 
     }
@@ -58,11 +82,11 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     @Override
     public int registra() throws RemoteException {
         try {
-            remoteHostName = getClientHost();
+            clientIPs.put(idGenerator, getClientHost());
         } catch (ServerNotActiveException ex) {
             ex.printStackTrace();
         }
-        
+
         playerScores.put(idGenerator, 0);
 
         return idGenerator++;
