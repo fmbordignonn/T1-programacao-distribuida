@@ -87,7 +87,9 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
                     try {
                         // monta a string pra buscar o client na sua interface VALIDAR
                         String connectLocation = hosts.get(i);
-
+						if(connectLocation == null){
+							continue;
+						}
                         System.out.println("Connecting to client at " + connectLocation);
                         jogadorClient = (JogadorClient) Naming.lookup(connectLocation);
                     } catch (Exception ex) {
@@ -103,7 +105,6 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
                     try {
                         jogadorClient.verifica();
                     } catch (RemoteException ex) {
-                        System.out.println(String.format("Jogador ID %s desconectou", i));
                         hosts.remove(i);
                         numeroJogadores--;
                     }
