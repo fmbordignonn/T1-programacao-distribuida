@@ -1,17 +1,17 @@
-all:			JogadorClient.class JogadorServer.class \
-			JogadorClientImpl.class JogadorServerImpl.class
+all:			JogadorClient.class JogoServer.class \
+			JogadorClientImpl.class JogoServerImpl.class
 
 JogadorClient.class:	JogadorClient.java
 			@javac JogadorClient.java
 
-JogadorServer.class:	JogadorServer.java
-			@javac JogadorServer.java
+JogoServer.class:	JogoServer.java
+			@javac JogoServer.java
 
 JogadorClientImpl.class:	JogadorClientImpl.java
 			@javac JogadorClientImpl.java
 
-JogadorServerImpl.class:	JogadorServerImpl.java
-			@javac JogadorServerImpl.java
+JogoServerImpl.class:	JogoServerImpl.java
+			@javac JogoServerImpl.java
 
 clean:
 			@rm -f *.class *~

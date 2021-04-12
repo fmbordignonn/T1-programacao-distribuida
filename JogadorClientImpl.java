@@ -61,9 +61,11 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 			System.out.println ("JogoServer failed: ");
 			e.printStackTrace();
 		}
-
+	
+		int idJogador = 0;
+	
 		try {
-			jogoServer.registra();
+			idJogador = jogoServer.registra();
 			System.out.println("Calling server to register player" + i);
 		} catch (RemoteException e) {
 				e.printStackTrace();
@@ -78,18 +80,18 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 
 			for (int i = 0; i < Integer.parseInt(args[2]); i++) {
 
-				jogoServer.joga(0); //verificar parâmetro
+				jogoServer.joga(idJogador); //verificar parâmetro
 
 				String desiste = sc.nextLine();
 
 				if (desiste.equals("ff")) {
 
-					jogoServer.desiste(0); //verificar parâmetro
+					jogoServer.desiste(idJogador); //verificar parâmetro
 					System.exit(1);
 
 				}
 
-				jogoServer.finaliza(0); //verificar parâmetro
+				jogoServer.finaliza(idJogador); //verificar parâmetro
 				System.exit(1);
 			}
 		}
