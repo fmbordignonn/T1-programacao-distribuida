@@ -27,11 +27,11 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     private static Map<Integer, Integer> playerScores = new HashMap<Integer, Integer>();
 
     private static Map<Integer, String> clientIPs = new HashMap<Integer, String>();
-    
+
     private static Boolean seBonificou;
 
     public static void main(String[] args) throws RemoteException, InterruptedException {
-	
+
         if (args.length != 2) {
             // ADICIONAR PARAMETRO PLAYERS
             System.out.println("Usage: java JogoServer <server ip> <players>");
@@ -54,47 +54,49 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
             System.out.println("JogoServer failed: " + e);
         }
 
-        int numeroJogadores = Integer.parseInt(args[1]);  
+        int numeroJogadores = Integer.parseInt(args[1]);
 
-        while(true){
-			Thread.sleep(1000);
-			if(numeroJogadores == clientIPs.size()){
-			
-			for (int i = 0; i < clientIPs.size(); i++) {
-			String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
-			JogadorClient jogadorClient = null;
-				try {
-					System.out.println("Connecting to client at " + connectLocation);
-					jogadorClient = (JogadorClient) Naming.lookup(connectLocation);
-					jogadorClient.inicia();
-				} catch (Exception ex) {
-					System.err.println("Failed to metodoInicia");
-					ex.printStackTrace();
-				}
-			}
-			break;
+        while (true) {
+            Thread.sleep(1000);
+            if (numeroJogadores == clientIPs.size()) {
+
+                for (int i = 0; i < clientIPs.size(); i++) {
+                    String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
+                    JogadorClient jogadorClient = null;
+                    try {
+                        System.out.println("Connecting to client at " + connectLocation);
+                        jogadorClient = (JogadorClient) Naming.lookup(connectLocation);
+                        jogadorClient.inicia();
+                    } catch (Exception ex) {
+                        System.err.println("Failed to call inicia() method on client");
+                        ex.printStackTrace();
+                    }
+                }
+                break;
             }
         }
 
         while (true) {
             // verificar size
             for (int i = 0; i < clientIPs.size(); i++) {
-                // monta a string pra buscar o client na sua interface VALIDAR
-                String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
-
-                JogadorClient jogadorClient = null;
                 if (numeroJogadores == clientIPs.size()) {
+                    JogadorClient jogadorClient = null;
                     try {
+                        // monta a string pra buscar o client na sua interface VALIDAR
+                        String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
+
                         System.out.println("Connecting to client at " + connectLocation);
                         jogadorClient = (JogadorClient) Naming.lookup(connectLocation);
                     } catch (Exception ex) {
-                        System.err.println("Failed to callback");
+                        System.err.println("Failed to connect to client");
                         ex.printStackTrace();
                     }
-                    if(seBonificou == true){
+
+                    if (seBonificou == true) {
                         jogadorClient.bonifica();
                         seBonificou = false;
                     }
+
                     try {
                         jogadorClient.verifica();
                     } catch (RemoteException ex) {
@@ -126,14 +128,14 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     public int joga(int id) throws RemoteException {
         System.out.println(String.format("Jogador ID %d vai jogar....", id));
         Random gerador = new Random();
-		int bonifica = gerador.nextInt(99);
+        int bonifica = gerador.nextInt(99);
 
-		if(bonifica <= 2) {
-			seBonificou = true;
-			playerScores.put(id, playerScores.get(id) + 6);
-		} else {
-			playerScores.put(id, playerScores.get(id) + 5);
-		}
+        if (bonifica <= 2) {
+            seBonificou = true;
+            playerScores.put(id, playerScores.get(id) + 6);
+        } else {
+            playerScores.put(id, playerScores.get(id) + 5);
+        }
         int playTime = ThreadLocalRandom.current().nextInt(250, 950);
 
         System.out.println("Jogada vai levar " + playTime + "ms");
