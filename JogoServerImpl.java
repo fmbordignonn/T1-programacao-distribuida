@@ -24,7 +24,7 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
     private static Map<Integer, Integer> playerScores = new HashMap<Integer, Integer>();
 
-    private static Map<Integer, String> clientIPs = new HashMap<Integer, String>();
+    private static Map<Integer, String> hosts = new HashMap<Integer, String>();
 
     private static boolean seBonificou;
 
@@ -56,10 +56,11 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
         while (true) {
             Thread.sleep(1000);
-            if (numeroJogadores == clientIPs.size()) {
+            if (numeroJogadores == hosts.size()) {
 
-                for (int i = 0; i < clientIPs.size(); i++) {
-                    String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
+                for (int i = 0; i < hosts.size(); i++) {
+                    String connectLocation = hosts.get(i);
+
                     JogadorClient jogadorClient = null;
                     try {
                         System.out.println("Connecting to client at " + connectLocation);
@@ -75,13 +76,17 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
         }
 
         while (true) {
+            if(hosts.isEmpty()){
+                break;
+            }
+
             // verificar size
-            for (int i = 0; i < clientIPs.size(); i++) {
-                if (numeroJogadores == clientIPs.size()) {
+            for (int i = 0; i < hosts.size(); i++) {
+                if (numeroJogadores == hosts.size()) {
                     JogadorClient jogadorClient = null;
                     try {
                         // monta a string pra buscar o client na sua interface VALIDAR
-                        String connectLocation = "rmi://" + clientIPs.get(i) + rmiClient + i;
+                        String connectLocation = hosts.get(i);
 
                         System.out.println("Connecting to client at " + connectLocation);
                         jogadorClient = (JogadorClient) Naming.lookup(connectLocation);
@@ -95,11 +100,11 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
                         seBonificou = false;
                     }
 
-                   try {
+                    try {
                         jogadorClient.verifica();
                     } catch (RemoteException ex) {
                         System.out.println(String.format("Jogador ID %s desconectou", i));
-                        clientIPs.remove(i);
+                        hosts.remove(i);
                         numeroJogadores--;
                     }
 
@@ -109,6 +114,7 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
             Thread.sleep(5000);
         }
 
+        System.out.println("Encerrando servidor");
     }
 
     @Override
@@ -116,7 +122,7 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
         try {
             System.out.println("Registrando jogador host " + getClientHost());
 
-            clientIPs.put(idGenerator, getClientHost());
+            hosts.put(idGenerator, "rmi://" + getClientHost() + rmiClient + idGenerator);
         } catch (ServerNotActiveException ex) {
             ex.printStackTrace();
         }
