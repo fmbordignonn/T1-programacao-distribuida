@@ -4,8 +4,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 import java.util.Timer;
-
-import javax.swing.text.StyledEditorKit.BoldAction;
+import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
 
 public class JogadorClientImpl extends UnicastRemoteObject implements JogadorClient {
 
@@ -32,7 +32,7 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 		}
 
 		try {
-			System.setProperty("java.rmi.server.hostname", args[1]);
+			System.setProperty("java.rmi.server.hostname", args[0]);
 			LocateRegistry.createRegistry(port);
 			System.out.println("java RMI registry created.");
 		} catch (RemoteException e) {
@@ -41,13 +41,23 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 
 		i = 0;
 
-		try {
-			String client = "rmi://" + args[1] + rmiClient + i++;
-			Naming.rebind(client, new JogadorClientImpl());
-			System.out.println("JogadorClient is ready.");
-		} catch (Exception e) {
-			System.out.println("JogadorClient failed: " + e);
-		}
+		while (true) {
+            try {
+                String client = "rmi://" + args[1] + rmiClient + i++;
+
+                Naming.bind(client, new JogadorClientImpl());
+
+                System.out.println("JogadorClient is ready.");
+                break;
+            } catch (AlreadyBoundException e) {
+                System.out.println("Já ta bindado no i: " + i);
+            } catch (MalformedURLException | RemoteException e) {
+                System.out.println("JogadorClient failed");
+                e.printStackTrace();
+                break;
+            }
+        }
+
 
 		String remoteHostName = args[0];
 		String connectLocation = "rmi://" + remoteHostName + rmiServer;
@@ -78,12 +88,13 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 
 		Scanner sc = new Scanner(System.in);
 		Timer timer = new Timer();
-
+		int pontuacao = 0;
 		for (int i = 0; i < Integer.parseInt(args[2]); i++) {
 
-			jogoServer.joga(idJogador); // verificar parâmetro
+			pontuacao += jogoServer.joga(idJogador); // verificar parâmetro
+			System.out.println(pontuacao + " Njogada " + i);
 
-			String desiste = sc.nextLine();
+			String desiste = "sc.nextLine()";
 
 			if (desiste.equals("ff")) {
 
@@ -91,10 +102,9 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 				System.exit(1);
 
 			}
-
-			jogoServer.finaliza(idJogador); // verificar parâmetro
-			System.exit(1);
 		}
+		jogoServer.finaliza(idJogador); // verificar parâmetro
+		System.exit(1);
 	}
 
 	@Override

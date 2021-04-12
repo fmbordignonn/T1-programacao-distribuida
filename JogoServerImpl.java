@@ -22,13 +22,11 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
 
     private static volatile int idGenerator = 0;
 
-    private static String remoteHostName;
-
     private static Map<Integer, Integer> playerScores = new HashMap<Integer, Integer>();
 
     private static Map<Integer, String> clientIPs = new HashMap<Integer, String>();
 
-    private static Boolean seBonificou;
+    private static boolean seBonificou;
 
     public static void main(String[] args) throws RemoteException, InterruptedException {
 
@@ -92,17 +90,19 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
                         ex.printStackTrace();
                     }
 
-                    if (seBonificou == true) {
+                    if (seBonificou) {
                         jogadorClient.bonifica();
                         seBonificou = false;
                     }
 
-                    try {
+                   try {
                         jogadorClient.verifica();
                     } catch (RemoteException ex) {
-                        System.err.println("An error has occurred while calling verifica() method");
-                        ex.printStackTrace();
+                        System.out.println(String.format("Jogador ID %s desconectou", i));
+                        clientIPs.remove(i);
+                        numeroJogadores--;
                     }
+
                 }
             }
 
