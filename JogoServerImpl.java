@@ -114,6 +114,8 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     @Override
     public int registra() throws RemoteException {
         try {
+            System.out.println("Registrando jogador host " + getClientHost());
+
             clientIPs.put(idGenerator, getClientHost());
         } catch (ServerNotActiveException ex) {
             ex.printStackTrace();
