@@ -2,6 +2,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Random;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 
@@ -83,9 +84,19 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
 		}
 
 		int pontuacao = 0;
+		Random gerador = new Random();
+		int desiste;
+
 		for (int i = 0; i < Integer.parseInt(args[2]); i++) {
 			pontuacao += jogoServer.joga(idJogador);
 			System.out.println(pontuacao + " N jogada " + i);
+			desiste = gerador.nextInt(99);
+
+			if (desiste == 0) {
+				jogoServer.desiste(idJogador);
+				System.exit(1);
+
+			}
 		}
 		jogoServer.finaliza(idJogador);
 		System.exit(1);
