@@ -47,7 +47,7 @@ public class JogadorClientImpl extends UnicastRemoteObject implements JogadorCli
                 System.out.println("JogadorClient is ready.");
                 break;
             } catch (AlreadyBoundException e) {
-                System.out.println("Já ta bindado no i: " + i);
+                System.out.println("Endpoint " + i + " já contém um registro");
             } catch (MalformedURLException | RemoteException e) {
                 System.out.println("JogadorClient failed");
                 e.printStackTrace();
