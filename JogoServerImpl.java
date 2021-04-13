@@ -31,7 +31,6 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
     public static void main(String[] args) throws RemoteException, InterruptedException {
 
         if (args.length != 2) {
-            // ADICIONAR PARAMETRO PLAYERS
             System.out.println("Usage: java JogoServer <server ip> <players>");
             System.exit(1);
         }
@@ -80,12 +79,10 @@ public class JogoServerImpl extends UnicastRemoteObject implements JogoServer {
                 break;
             }
 
-            // verificar size
             for (int i = 0; i < hosts.size(); i++) {
                 if (numeroJogadores == hosts.size()) {
                     JogadorClient jogadorClient = null;
                     try {
-                        // monta a string pra buscar o client na sua interface VALIDAR
                         String connectLocation = hosts.get(i);
 						if(connectLocation == null){
 							continue;
